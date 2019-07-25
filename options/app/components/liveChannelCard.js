@@ -12,10 +12,16 @@ Vue.component('live-channel-card', {
                     <img v-bind:src="channelImgUrl" @error="channelImgFail">
                     <video autoplay="true" loop="true" @canplay="if(hover) { videoReady = true }" v-if="hover === true" v-show="videoReady === true" v-bind:src="channelVidUrl"></video>
                     <div class="liveAndViewers">
+
                         <span class="favorite-btn" @click="addOrRemoveFavorite($event)" :id="friend.token + 'fav'">
                             <i class="fa" :class="favorite ? 'fa-star' : 'fa-star-o'" aria-hidden="true"></i>                     
-                        </span>
+                        </span>                       
                         <b-tooltip :target="friend.token + 'fav'" :title="favorite ? 'Remove Favorite' : 'Add Favorite'" no-fade="true"></b-tooltip>
+
+                        <span class="host-btn" @click="hostChannel($event)" :id="friend.token + 'host'">
+                            <i class="fa fa-user-circle-o" aria-hidden="true"></i>                     
+                        </span>                       
+                        <b-tooltip :target="friend.token + 'host'" title="Host channel" no-fade="true"></b-tooltip>
                         
 						<div class="viewersBadge">
 							<i class="fa fa-eye" aria-hidden="true" style="margin-right:5px;"></i>{{friend.viewersCurrent}} 
@@ -60,7 +66,8 @@ Vue.component('live-channel-card', {
 			</a>
         </div>
 	`,
-	props: ['friend', 'favorite'],
+    props: ['friend', 'favorite'],
+    mixins: [friendFetcher],
 	data: function() {
 		return {
 			hover: false,
@@ -96,6 +103,11 @@ Vue.component('live-channel-card', {
 			} else {
 				this.$emit('add-favorite', this.friend.token);
 			}
+        },
+        hostChannel: async function(event) {
+            if(event) event.preventDefault();
+            let hosted = await this.sendHostChannelRequest(friend.id);
+            console.log("hosted: ", hosted);
 		},
 		channelImgFail: function(e) {
 			e.target.style.display='none';

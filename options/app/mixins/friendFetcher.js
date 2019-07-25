@@ -1,4 +1,6 @@
-const clientId = 'd2158e591bb347931751bef151ee3bf3e5c8cb9608924a7a';
+const ELIXR_CLIENT_ID = 'd2158e591bb347931751bef151ee3bf3e5c8cb9608924a7a';
+const CURRENT_USER_URL = 'https://mixer.com/api/v1/users/current';
+const HOST_CHANNEL_URL = 'https://mixer.com/api/v1/channels/{channelId}/hostee';
 
 friendFetcher = { 
 	methods: {
@@ -9,7 +11,7 @@ friendFetcher = {
 				var request = new XMLHttpRequest();
 
 				request.open('GET', 'https://mixer.com/api/v1/users/current', true);
-				request.setRequestHeader('Client-ID', clientId);
+				request.setRequestHeader('Client-ID', ELIXR_CLIENT_ID);
 
 				request.onload = function() {
 					if (request.status >= 200 && request.status < 400) {
@@ -29,7 +31,102 @@ friendFetcher = {
 
 				request.send();
 			});
-		},
+        },
+        getCurrentChannelId: async function() {
+           try {
+                let response = await fetch(CURRENT_USER_URL, {
+                    credentials: 'include',
+                    headers: {
+                        'Client-ID': ELIXR_CLIENT_ID
+                    }
+                });
+                if(response.ok) {
+                    let user = await response.json();
+                    return user && user.channel && user.channel.id;
+                } else {
+                    console.log('Failed to get current user.', response.statusText);
+                    return null;
+                }
+            } catch(err) {
+                console.log('Unable to get current user.', err);
+                return null;
+            }
+        },
+        sendHostChannelRequest: function(channelToHost) {
+            let app = this;
+
+            console.log("1!");
+            return new Promise(async resolve => {
+
+                console.log("here!");
+
+                if(channelToHost == null) return resolve(false);
+
+                console.log("2!");
+
+                let channelId = await app.getCurrentChannelId();
+
+                console.log("3!");
+
+                if(!channelId) return resolve(false);
+                console.log("4!");
+
+                var xhr = new XMLHttpRequest();
+                xhr.open("PUT", HOST_CHANNEL_URL.replace("{channelId}", channelId), true);
+                xhr.setRequestHeader('Content-type','application/json; charset=utf-8');
+                xhr.onload = function () {
+                    console.log("GOT RESPONSE")                 
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                        var responseData = JSON.parse(xhr.responseText);
+                        console.log(responseData);
+                        resolve(true);
+                    } else {
+                        console.error(xhr);
+                        resolve(false);
+                    }
+                }
+
+                xhr.onerror = function() {
+                    console.log("ERROR WHILE HOSTING");
+                    console.log(xhr);
+                    resolve(false);
+                }
+
+                var data = {
+                    id: channelToHost
+                };
+                var json = JSON.stringify(data);
+                xhr.send(json);
+            });
+            /*try {
+
+                if(channelToHost == null) return false;
+
+                let channelId = await app.getCurrentChannelId();
+
+                if(!channelId) return false;
+
+                let formData = new FormData();
+                formData.append('id', channelToHost);
+
+                let response = await fetch(HOST_CHANNEL_URL.replace("{channelId}", channelId), {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: {
+                        'Client-ID': ELIXR_CLIENT_ID
+                    },
+                    body: formData
+                });
+                if(!response.ok) {
+                    console.log('Failed to host channel.', response.statusText);
+                    return null;
+                }
+                return response.ok;
+            } catch(err) {
+                console.log('Failed to host channel.', err);
+                return null;
+            }*/
+        },
 		getMixerFollows: function(userId, page, followList, onlyOnline = true){
 			var app = this;
 			// This will get 100 follows on a specific page.

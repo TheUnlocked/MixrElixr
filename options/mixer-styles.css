@@ -274,7 +274,8 @@ input.me-search:focus {
 }
 
 .thumbnail .liveAndViewers .viewersBadge, 
-.thumbnail .liveAndViewers .favorite-btn {
+.thumbnail .liveAndViewers .favorite-btn,
+.thumbnail .liveAndViewers .host-btn {
     display: flex;
     align-items: center;
     font-size: 0.9em;
@@ -283,14 +284,17 @@ input.me-search:focus {
     padding: 4px 8px;
 }
 
-.favorite-btn {
+.favorite-btn, .host-btn {
     transition: 0.3s;
     margin-right: 2px;
 }
 
 .favorite-btn:hover {
-    color: #0faf27;
-    
+    color: #0faf27;   
+}
+
+.host-btn:hover {
+    color: #80bdff;   
 }
 
 .card-icon {
