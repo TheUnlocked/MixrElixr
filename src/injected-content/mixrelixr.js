@@ -1,6 +1,9 @@
 //import styles
 import './scss/injected-styles.scss';
 
+// vue apps
+import * as autocompleteAppBinder from './vue-apps/emote-autocomplete/emote-autocomplete-binder';
+
 //import deps
 import $ from 'jquery';
 global.jQuery = $;
@@ -1246,6 +1249,9 @@ $(() => {
     };
 
     waitForElementAvailablity("[class*='webComposerBlock']").then(() => {
+        //bindEmoteAutocompleteApp();
+        log("ATTEMPTING TO BIND VUE APP");
+        autocompleteAppBinder.bindEmoteAutocompleteApp(cache.globalEmotes, cache.currentStreamerEmotes);
       /*
       let keyupFunc = () => {
         let allText = $("#chat-input").children("textarea").val();
